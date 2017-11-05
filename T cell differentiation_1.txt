@@ -1,0 +1,197 @@
+# Model_specs.py #
+# They can be used as inputs for simulations with PyDSTool
+
+pars = {} # parameters
+varspecs = {} # ODEs
+fnspecs = {} # helper functions
+
+# Symmetrical model without intermediates
+pars['sym_1'] = {
+	'tgf'		: 0,
+	'w_Foxp3_ROR'	: -0.4,
+	'w_ROR_Foxp3'	: -0.4,
+	'w_Foxp3_Foxp3'	: 1.24,
+	'w_ROR_ROR'	: 1.24,
+	'w_Foxp3_O'	: -0.8,
+	'w_ROR_O'	: -0.8,
+	'w_Foxp3_tgf'	: 1.2,
+	'w_ROR_tgf'	: 1.2,
+	'sigma_Foxp3'	: 5,
+	'sigma_ROR'	: 5,
+	'gamma_Foxp3'	: 1,
+	'gamma_ROR'	: 1,
+}
+
+varspecs['sym_1'] = {
+	'Foxp3'	: \
+		'gamma_Foxp3 * ( hbt(sigma_Foxp3, w_Foxp3_O + \
+		w_Foxp3_Foxp3 * Foxp3 + \
+		w_Foxp3_ROR * ROR + w_Foxp3_tgf * tgf)\
+		 - Foxp3 )',
+	'ROR'	: \
+		'gamma_ROR * ( hbt(sigma_ROR, w_ROR_O + \
+		w_ROR_ROR * ROR + \
+		w_ROR_Foxp3 * Foxp3 + w_ROR_tgf * tgf)\
+		 - ROR )'
+}
+
+fnspecs['sym_1'] = {
+	'hbt': \
+	(['sigma', 'sum_omega'],'1 / (1 + exp(-sigma * sum_omega))')
+}
+
+
+# Symmetrical model with intermediates
+pars['sym_2'] = {
+	'tgf'		: 0,
+	'w_Foxp3_ROR'	: -0.4,
+	'w_ROR_Foxp3'	: -0.4,
+	'w_Foxp3_Foxp3'	: 1.2,
+	'w_ROR_ROR'	: 1.2,
+	'w_Foxp3_O'	: -0.8,
+	'w_ROR_O'	: -0.8,
+	'w_Foxp3_Smad'	: 0.62,
+	'w_ROR_UI'	: 0.62,
+	'sigma_Foxp3'	: 5,
+	'sigma_ROR'	: 5,
+	'gamma_Foxp3'	: 1,
+	'gamma_ROR'	: 1,
+	'gamma_Smad'	: 1,
+	'sigma_Smad'	: 15,
+	'w_Smad_O'	: -0.21,
+	'w_Smad_tgf'	: 1.2,
+	'gamma_UI'	: 1,
+	'sigma_UI'	: 15,
+	'w_UI_O'	: -0.21,
+	'w_UI_tgf'	: 1.2,
+}
+
+varspecs['sym_2'] = {
+	'Foxp3'	: \
+		'gamma_Foxp3 * ( hbt(sigma_Foxp3, w_Foxp3_O + \
+		w_Foxp3_Foxp3 * Foxp3 + w_Foxp3_ROR * ROR +\
+		w_Foxp3_Smad * Smad)\
+		 - Foxp3 )',
+	'Smad'	: \
+		'gamma_Smad * ( hbt(sigma_Smad, w_Smad_O + w_Smad_tgf * tgf)\
+		 - Smad )',
+	'UI'	: \
+		'gamma_UI * ( hbt(sigma_UI, w_UI_O + w_UI_tgf * tgf) \
+		 - UI)',
+	'ROR'	: \
+		'gamma_ROR * ( hbt(sigma_ROR, w_ROR_O + \
+		w_ROR_ROR * ROR + \
+		w_ROR_Foxp3 * Foxp3 + w_ROR_UI * UI)\
+		 - ROR )',
+}
+
+fnspecs['sym_2'] = {
+	'hbt': \
+	(['sigma', 'sum_omega'],'1 / (1 + exp(-sigma * sum_omega))')
+}
+
+# Asymetric Model
+pars['asym'] = {
+	'tgf'		: 0,
+	'il6'		: 0,
+	'atra'		: 0,
+	'w_Foxp3_ROR'	: -0.54,
+	'w_ROR_Foxp3'	: 0,
+	'w_Foxp3_Foxp3'	: 1.28,
+	'w_ROR_ROR'	: 0.7,
+	'w_Foxp3_O'	: -0.84,
+	'w_ROR_O'	: -0.92,
+	'w_Foxp3_Smad'	: 0.68,
+	'w_ROR_UI'	: 0.86,
+	'sigma_Foxp3'	: 5,
+	'sigma_ROR'	: 7,
+	'gamma_Foxp3'	: 1,
+	'gamma_ROR'	: 1,
+	'w_ROR_STAT3'	: 0.2,
+	'w_Foxp3_STAT3'	: -0.1,
+	'w_ROR_atra'	: -0.04,
+	'w_IL17_atra'	: -0.1,
+	'w_Foxp3_atra'	: 0.035,
+	'sigma_IL17'	: 30,
+	'gamma_IL17'	: 1,
+	'w_IL17_O'	: -0.82,
+	'w_IL17_STAT3'	: 0.59,
+	'w_IL17_ROR'	: 0.22,
+	'w_IL17_Foxp3'	: -0.8,
+	'gamma_Smad'	: 1,
+	'sigma_Smad'	: 20,
+	'w_Smad_O'	: -0.225,
+	'w_Smad_tgf'	: 0.8*3.8/3,
+	'gamma_UI'	: 1,
+	'sigma_UI'	: 12,
+	'w_UI_O'	: -0.23,
+	'w_UI_tgf'	: 0.8*3.8/3,
+	'gamma_STAT3'	: 0.1,
+	'sigma_STAT3'	: 10,
+	'w_STAT3_O'	: -0.4,
+	'w_STAT3_il6'	: 0.2,
+}
+
+
+varspecs['asym'] = {
+	'Foxp3'	: \
+		'gamma_Foxp3 * ( hbt(sigma_Foxp3, w_Foxp3_O + \
+		w_Foxp3_Foxp3 * Foxp3 + w_Foxp3_ROR * ROR +\
+		w_Foxp3_atra * atra  \
+		+ w_Foxp3_Smad * Smad +\
+		 w_Foxp3_STAT3 * STAT3)\
+		 - Foxp3 )',
+	'Smad'	: \
+		'gamma_Smad * ( hbt(sigma_Smad, w_Smad_O + w_Smad_tgf * tgf\
+		 )\
+		 - Smad )',
+	'UI'	: \
+		'gamma_UI * ( hbt(sigma_UI, w_UI_O + w_UI_tgf * tgf\
+		 )\
+		 - UI)',
+	'ROR'	: \
+		'gamma_ROR * ( hbt(sigma_ROR, w_ROR_O + \
+		w_ROR_ROR * ROR + w_ROR_atra * atra + \
+		w_ROR_Foxp3 * Foxp3 + w_ROR_UI * UI + \
+		w_ROR_STAT3 * STAT3)\
+		 - ROR )',
+	'STAT3'	: \
+		'gamma_STAT3 * ( hbt(sigma_STAT3, w_STAT3_O + \
+		w_STAT3_il6 * il6)\
+		- STAT3)',
+	'IL17'	: \
+		'gamma_IL17 * ( hbt(sigma_IL17,  w_IL17_STAT3 * STAT3 \
+		 + w_IL17_O +\
+		 w_IL17_ROR * ROR \
+		 + w_IL17_atra * atra + w_IL17_Foxp3 * Foxp3) - IL17)'
+}
+
+fnspecs['asym'] = {
+	'hbt': \
+	(['sigma', 'sum_omega'],'1 / (1 + exp(-sigma * sum_omega))')
+}
+
+
+class Model_specs:
+	def __init__(self, name):
+		self.name = name
+	def pars(self):
+		return pars[self.name]
+	def varspecs(self):
+		return varspecs[self.name]
+	def fnspecs(self):
+		if fnspecs.has_key(self.name):
+			return fnspecs[self.name]
+		else:
+			return {}
+	def load_model_specs(self, args_obj):
+		args_obj.pars = self.pars()
+		args_obj.varspecs = self.varspecs()
+		args_obj.fnspecs = self.fnspecs()
+		# initialize every state varialbe with 0.001
+		args_obj.ics = {}
+		for key in self.varspecs():
+			args_obj.ics[key] = 0.001
+
+
+

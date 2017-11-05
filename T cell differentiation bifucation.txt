@@ -1,0 +1,97 @@
+# bifurcation.py #
+# It requires a module file 'Model_specs.py' which contains equations for each
+
+import Model_specs
+import PyDSTool
+import matplotlib.pyplot as plt
+from pylab import show
+from sys import exit
+from matplotlib import mpl
+from matplotlib.ticker import NullFormatter
+
+# Figure format
+mpl.rcParams['font.sans-serif'] =  'Arial'
+mpl.rcParams['mathtext.default'] = 'regular'
+mpl.rcParams['xtick.labelsize'] = 8
+mpl.rcParams['ytick.labelsize'] = 8
+mpl.rcParams['figure.subplot.left'] = 0.2
+mpl.rcParams['figure.subplot.right'] = 0.95
+mpl.rcParams['figure.subplot.bottom'] = 0.08
+mpl.rcParams['figure.subplot.wspace'] = 0.3
+mpl.rcParams['figure.subplot.hspace'] = 0.03
+text_ROR = 'ROR' + r"$\gamma$" + 't'
+text_TGF = 'TGF-' + r"$\beta$"
+nullfmt	= NullFormatter()
+
+# load the model specs from Model_specs.py
+DSargs = PyDSTool.args(name='T_cell') # arbitary name
+model_specs = Model_specs.Model_specs(name='sym_1') # Model name in Model_specs.py
+model_specs.load_model_specs(DSargs) # load DSargs with functions and parameters
+
+# set initial state
+naive_state = {
+	'ROR'	: 0.0001,
+	'Foxp3'	: 0.0001,
+}
+DSargs.ics = naive_state
+
+# setup generator
+ode = PyDSTool.Generator.Dopri_ODEsystem(DSargs)
+
+ctrl_par = 'tgf' # control parameter
+PyCont = PyDSTool.ContClass(ode)
+PCargs = PyDSTool.args(name='EQ1', type='EP-C') # first branch
+PCargs.freepars = [ctrl_par]
+
+# Continuation numerics
+PCargs.MaxNumPoints = 450
+PCargs.MaxStepSize	= 0.02
+PCargs.MinStepSize	= 1e-3
+PCargs.StepSize		= 1e-2
+PCargs.LocBifPoints	= 'all'
+PCargs.SaveEigen	= True
+
+# Compute first branch
+PyCont.newCurve(PCargs)
+PyCont['EQ1'].forward()
+			
+if PyCont['EQ1'].getSpecialPoint('BP1') is not None:
+	PCargs.name = 'EQ2' # second branch
+	PCargs.initpoint = 'EQ1:BP1'
+	PCargs.initdirec = PyCont['EQ1'].getSpecialPoint('BP1')\
+		.labels['BP']['data'].branch
+
+	# Compute second branch
+	PyCont.newCurve(PCargs)
+	PyCont['EQ2'].forward()
+
+
+# Plotting two 1-parameter bifurcation diagrams
+
+fig = plt.figure(figsize=(4,8))
+ax_ROR = fig.add_subplot(2,1,1)
+PyCont.display([ctrl_par, 'ROR'], stability='true',\
+	 linewidth=1.5, color='r', axes=ax_ROR, figure=fig)
+title = '1-parameter bifurcation\ndiagram'
+size = 10
+fp = mpl.font_manager.FontProperties(size=size)
+ax_ROR.set_title(title)
+ax_ROR.set_xlabel('')
+ax_ROR.set_ylabel(text_ROR, fontproperties=fp)
+ax_ROR.set_ylim([-0.1, 1.1])
+ax_ROR.set_xlim([0.0, 0.7])
+ax_ROR.xaxis.set_major_formatter(nullfmt)
+
+ax_Foxp3 = fig.add_subplot(2,1,2)
+PyCont.display([ctrl_par, 'Foxp3'], stability='true',\
+	 linewidth=1.5, color='g', axes=ax_Foxp3, figure=fig)	
+ax_Foxp3.set_xlabel(text_TGF)
+ax_Foxp3.set_ylabel('Foxp3', fontproperties=fp)
+ax_Foxp3.set_ylim([-0.1, 1.1])
+ax_Foxp3.set_xlim([0.0, 0.7])
+
+
+show()
+exit()
+
+	
